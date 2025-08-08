@@ -82,6 +82,15 @@
 
   # List services that you want to enable:
 
+  services.xserver = {
+    enable = true;
+    desktopManager = {
+      xterm.enable = false;
+      xfce.enable = true;
+    };
+  };
+  services.displayManager.defaultSession = "xfce";
+
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
 

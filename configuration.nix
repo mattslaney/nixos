@@ -56,7 +56,9 @@
     isNormalUser = true;
     description = "Matt";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [];
+    packages = with pkgs; [
+      firefox
+    ];
   };
 
   # Allow unfree packages

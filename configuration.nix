@@ -10,12 +10,28 @@
       ./hardware-configuration.nix
     ];
 
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+
+  boot.supportedFilesystems = [ "nfs" ];
+
+  fileSystems."/mnt/nfs/file-server" = {
+    device = "192.168.30.22:/srv/nfs/pool";
+    fsType = "nfs";
+    options = [ "x-systemd.automount" "x-systemd.idle-timeout=60" "noauto" ];
+  };
+
+  fileSystems."/mnt/nfs/backup-server" = {
+    device = "192.168.30.23:/srv/nfs/pool";
+    fsType = "nfs";
+    options = [ "x-systemd.automount" "x-systemd.idle-timeout=60" "noauto" ];
+  };
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -51,15 +67,77 @@
   # Configure console keymap
   console.keyMap = "uk";
 
+  users.groups.system.gid = 2000;
+  users.groups.private.gid = 2001;
+  users.groups.public.gid = 2002;
+
+
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
+  users.groups.matt.gid = 1000;
   users.users.matt = {
+    group = "matt";
     isNormalUser = true;
     description = "Matt";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "users" "networkmanager" "wheel" "wireshark" "private" "public" ];
     packages = with pkgs; [
       firefox
+      remmina
+      rofi
+      deskflow
+      vscodium
+      go
+      python3
+
+      # Add the zentile package using buildGoModule
+      (pkgs.buildGoModule {
+        pname = "cortile";
+        version = "1.0"; # Set the appropriate version
+
+        src = pkgs.fetchFromGitHub {
+          owner = "leukipp";
+          repo = "cortile";
+          rev = "96a0eddbaf37706a7ed64ffdf93cfc675e144730";
+          sha256 = "1zj878hcb4i7s8f94rrayrvvwr299kav6zpll3kfmg5n0fhkpxfv";
+        };
+
+        # If the project uses vendoring, specify the vendorHash
+        vendorHash = "sha256-VlIPsUogiCQeWWrFsueB6COa91CWIGx3hb7HKC59rS0=";
+
+        meta = {
+          description = "Your description here";
+          homepage = "https://github.com/leukipp/cortile";
+          license = lib.licenses.mit; # Adjust the license as needed
+          maintainers = with lib.maintainers; [ /* your maintainer here */ ];
+        };
+      })
+
+      # Add the zentile package using buildGoModule
+      (pkgs.buildGoModule {
+        pname = "zentile";
+        version = "1.0"; # Set the appropriate version
+
+        src = pkgs.fetchFromGitHub {
+          owner = "blrsn";
+          repo = "zentile";
+          rev = "d33522ecc2fb62e16449d765faef2c218523510c";
+          sha256 = "03r16yl8ii4k0hwn3vimk1786cz4nw4dwg6m6bnras6b5mb7bj9v";
+        };
+
+        # If the project uses vendoring, specify the vendorHash
+        vendorHash = "sha256-610B3i3KvQjLuYvjIp5IPdZ01r+jjOBehJ5/YB5mME0="; 
+
+        meta = {
+          description = "Your description here";
+          homepage = "https://github.com/blrsn/zentile";
+          license = lib.licenses.mit; # Adjust the license as needed
+          maintainers = with lib.maintainers; [ /* your maintainer here */ ];
+        };
+      })
     ];
   };
+
+  programs.wireshark.enable = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -72,6 +150,13 @@
     git
     curl
     wget
+    nfs-utils
+    wireshark
+    wireguard-tools
+    protonvpn-gui
+    jq
+    inetutils
+    wakelan
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -89,6 +174,7 @@
     desktopManager = {
       xterm.enable = false;
       xfce.enable = true;
+#     xfce.enableWaylandSession = true;
     };
   };
   services.displayManager.defaultSession = "xfce";
@@ -97,10 +183,16 @@
   # services.openssh.enable = true;
 
   # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
+  networking.firewall.enable = true;
+  networking.firewall.allowedTCPPorts = [ 24800 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
+  networking.nftables.enable = true;
+
+  virtualisation.incus.enable = true;
+  virtualisation.podman.enable = true;
+  virtualisation.waydroid.enable = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

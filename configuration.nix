@@ -105,52 +105,6 @@
       gcc
       nodejs_24
       tree-sitter
-
-      # Add the zentile package using buildGoModule
-      (pkgs.buildGoModule {
-        pname = "cortile";
-        version = "1.0"; # Set the appropriate version
-
-        src = pkgs.fetchFromGitHub {
-          owner = "leukipp";
-          repo = "cortile";
-          rev = "96a0eddbaf37706a7ed64ffdf93cfc675e144730";
-          sha256 = "1zj878hcb4i7s8f94rrayrvvwr299kav6zpll3kfmg5n0fhkpxfv";
-        };
-
-        # If the project uses vendoring, specify the vendorHash
-        vendorHash = "sha256-VlIPsUogiCQeWWrFsueB6COa91CWIGx3hb7HKC59rS0=";
-
-        meta = {
-          description = "Your description here";
-          homepage = "https://github.com/leukipp/cortile";
-          license = lib.licenses.mit; # Adjust the license as needed
-          maintainers = with lib.maintainers; [ /* your maintainer here */ ];
-        };
-      })
-
-      # Add the zentile package using buildGoModule
-      (pkgs.buildGoModule {
-        pname = "zentile";
-        version = "1.0"; # Set the appropriate version
-
-        src = pkgs.fetchFromGitHub {
-          owner = "blrsn";
-          repo = "zentile";
-          rev = "d33522ecc2fb62e16449d765faef2c218523510c";
-          sha256 = "03r16yl8ii4k0hwn3vimk1786cz4nw4dwg6m6bnras6b5mb7bj9v";
-        };
-
-        # If the project uses vendoring, specify the vendorHash
-        vendorHash = "sha256-610B3i3KvQjLuYvjIp5IPdZ01r+jjOBehJ5/YB5mME0="; 
-
-        meta = {
-          description = "Your description here";
-          homepage = "https://github.com/blrsn/zentile";
-          license = lib.licenses.mit; # Adjust the license as needed
-          maintainers = with lib.maintainers; [ /* your maintainer here */ ];
-        };
-      })
     ];
   };
 

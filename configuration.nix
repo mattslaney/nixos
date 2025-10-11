@@ -16,19 +16,19 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = "matts-laptop"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   boot.supportedFilesystems = [ "nfs" ];
 
   fileSystems."/mnt/nfs/file-server" = {
-    device = "192.168.30.22:/srv/nfs/pool";
+    device = "file-server.home.arpa:/srv/nfs/pool";
     fsType = "nfs";
     options = [ "x-systemd.automount" "x-systemd.idle-timeout=60" "noauto" ];
   };
 
   fileSystems."/mnt/nfs/backup-server" = {
-    device = "192.168.30.23:/srv/nfs/pool";
+    device = "backup-server.home.arpa:/srv/nfs/pool";
     fsType = "nfs";
     options = [ "x-systemd.automount" "x-systemd.idle-timeout=60" "noauto" ];
   };
@@ -39,6 +39,8 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
+
+  hardware.bluetooth.enable = true;
 
   # Set your time zone.
   time.timeZone = "Europe/London";
@@ -71,8 +73,6 @@
   users.groups.private.gid = 2001;
   users.groups.public.gid = 2002;
 
-
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.groups.matt.gid = 1000;
   users.users.matt = {
@@ -83,11 +83,28 @@
     packages = with pkgs; [
       firefox
       remmina
-      rofi
+      chromium
       deskflow
-      vscodium
+      vscode
       go
-      python3
+      python314
+      zellij
+      neovim
+      fzf
+      ripgrep
+      wireshark
+      nmap
+      protonvpn-gui
+      jq
+      inetutils
+      wakelan
+      weston
+      lua
+      luarocks
+      rustup
+      gcc
+      nodejs_24
+      tree-sitter
 
       # Add the zentile package using buildGoModule
       (pkgs.buildGoModule {
@@ -137,6 +154,18 @@
     ];
   };
 
+  fonts.packages = with pkgs; [
+    nerd-fonts.ubuntu
+  ];
+
+  programs.niri.enable = true;
+
+  xdg.portal = {
+    enable = true;
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    xdgOpenUsePortal = true;
+  };
+
   programs.wireshark.enable = true;
 
   # Allow unfree packages
@@ -150,13 +179,22 @@
     git
     curl
     wget
+    nixfmt-rfc-style
     nfs-utils
-    wireshark
     wireguard-tools
-    protonvpn-gui
-    jq
-    inetutils
-    wakelan
+    
+# stuff for niri
+    rio
+    alacritty
+    fuzzel
+    mako
+    waybar
+#    xdg-desktop-portal-gtk
+#    xdg-desktop-portal-gnome
+    swaybg
+    swayidle
+    swaylock
+    xwayland-satellite
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -169,15 +207,15 @@
 
   # List services that you want to enable:
 
-  services.xserver = {
-    enable = true;
-    desktopManager = {
-      xterm.enable = false;
-      xfce.enable = true;
+#  services.xserver = {
+#    enable = true;
+#    desktopManager = {
+#      xterm.enable = false;
+#      xfce.enable = true;
 #     xfce.enableWaylandSession = true;
-    };
-  };
-  services.displayManager.defaultSession = "xfce";
+#    };
+#  };
+#  services.displayManager.defaultSession = "xfce";
 
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
@@ -193,6 +231,37 @@
   virtualisation.incus.enable = true;
   virtualisation.podman.enable = true;
   virtualisation.waydroid.enable = true;
+
+#  systemd.user.services."cortile" = {
+#    enable = true;
+#    description = "Tiling Window Manager";
+#    serviceConfig = {
+#      Type = "simple";
+#      ExecStart = "/etc/profiles/per-user/matt/bin/cortile";
+#    };
+#  };
+  
+  location.latitude = 51.509865;
+  location.longitude = -0.118092;
+  services.redshift = {
+    enable = true;
+    brightness = {
+      day = "1";
+      night = "0.5";
+    };
+    temperature = {
+      day = 5500;
+      night = 3700;
+    };
+  };
+
+  # services.kmscon = {
+  #   enable = true;
+  #   useXkbConfig = true;
+  #   extraConfig = ''
+  #     xkb-layout=gb
+  #   '';
+  # };
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
